@@ -116,6 +116,20 @@ const flowers = Array.from({ length: count }, (_, i) => {
   .flower-lavender .petal { background: var(--lavender); opacity: .85; }
 
   @media (max-width: 600px) {
-    .flower-ring-content { max-width: 92%; }
+    .flower-ring {
+      transform: scale(0.62);
+      transform-origin: center;
+    }
+    .flower-ring-wrap {
+      min-height: 0 !important; /* dejamos que el contenido defina el alto en mobile */
+    }
+  }
+    .flower-ring-wrap {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
   }
 </style>

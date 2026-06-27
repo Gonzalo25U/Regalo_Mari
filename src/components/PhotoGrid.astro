@@ -50,4 +50,13 @@ const { photos } = Astro.props;
   }
   .lightbox-trigger:hover { transform: scale(1.04); }
   .photo-placeholder { font-size: 2rem; opacity: .4; }
+  
+  @media (max-width: 600px) {
+  .photo-grid {
+    grid-auto-columns: minmax(90px, 120px);
+    overflow-x: auto;
+    justify-content: start;
+    padding-bottom: 6px;
+  }
+}
 </style>

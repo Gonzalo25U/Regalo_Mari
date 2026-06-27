@@ -62,7 +62,8 @@ import Lightbox from '../components/Lightbox.astro';
 
         <h2 class="block-title">De parte de su familia</h2>
         <p class="block-text family-text">
-          Quiero aprovechar este espacio para decirte algo: Muchas gracias por estar al lado de mi hermano,
+          <p>Quiero aprovechar este espacio para decirte algo:</p>
+          Muchas gracias por estar al lado de mi hermano,
           por elegir compartir tu vida con la de él. Desde que te conocimos, lo hemos visto mucho más feliz,
           más tranquilo, más él mismo. Lo has convertido en la mejor versión de él, y eso es algo que te agradecemos desde el fondo de nuestros corazones.
           Gracias por cuidarlo como lo cuidas, por quererlo como lo quieres, y por ser parte de nuestra historia ahora también.
@@ -77,7 +78,7 @@ import Lightbox from '../components/Lightbox.astro';
 <style>
   /* el contenedor con scroll propio: cada hijo .block "encaja" en pantalla al scrollear */
   .snap-page {
-    height: 100vh;
+    height: 100dvh;
     overflow-y: auto;
     scroll-snap-type: y proximity;
     scroll-behavior: smooth;
@@ -92,7 +93,7 @@ import Lightbox from '../components/Lightbox.astro';
 
   .block {
     position: relative;
-    min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
     box-sizing: border-box;
     display: flex;
@@ -195,6 +196,15 @@ import Lightbox from '../components/Lightbox.astro';
     0%   { opacity: 0; transform: translateY(0) scale(.7); }
     15%  { opacity: .9; }
     100% { opacity: 0; transform: translateY(-70vh) scale(1); }
+  }
+    @media (max-width: 600px) {
+    .block {
+      padding: 4vh 5vw;
+      border-radius: 18px;
+    }
+    .block-text {
+      font-size: 1.05rem;
+    }
   }
 </style>
 
