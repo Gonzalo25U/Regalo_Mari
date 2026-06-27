@@ -62,6 +62,7 @@ const { nextHref } = Astro.props;
 </section>
 
 <script>
+  import { navigate } from 'astro:transitions/client';
   import { gsap } from 'gsap';
 
   function setup() {
@@ -125,10 +126,22 @@ const { nextHref } = Astro.props;
       giftBtn!.classList.add('opened');
       idleTweens.forEach(t => t.pause());
 
+      const globalWindow = window as Window & {
+        __birthdayMusicStart?: () => Promise<void>;
+      };
+      if (typeof globalWindow.__birthdayMusicStart === 'function') {
+        void globalWindow.__birthdayMusicStart();
+      }
+
+
       const openTl = gsap.timeline({
         onComplete: () => {
           const next = giftBtn!.dataset.next;
-          if (next) window.location.href = next;
+          if (next) {
+            window.setTimeout(() => {
+              void navigate(next);
+            }, 1200);
+          }
         },
       });
 

@@ -1,0 +1,89 @@
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">✕</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+</div>
+
+<style>
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(20, 8, 14, .92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6vh 6vw;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s ease;
+  }
+  .lightbox.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .lightbox-img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 30px 70px rgba(0,0,0,.5);
+    transform: scale(.92);
+    transition: transform .25s ease;
+  }
+  .lightbox.is-open .lightbox-img {
+    transform: scale(1);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(231,207,140,.4);
+    background: rgba(42,16,32,.7);
+    color: var(--gold-light);
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  function setup() {
+    const lightbox = document.getElementById('lightbox');
+    const img = document.getElementById('lightboxImg') as HTMLImageElement | null;
+    const closeBtn = document.getElementById('lightboxClose');
+    if (!lightbox || !img || !closeBtn) return;
+
+    function open(src: string, alt: string) {
+      img!.src = src;
+      img!.alt = alt;
+      lightbox!.classList.add('is-open');
+      lightbox!.setAttribute('aria-hidden', 'false');
+    }
+
+    function close() {
+      lightbox!.classList.remove('is-open');
+      lightbox!.setAttribute('aria-hidden', 'true');
+    }
+
+    // delegación de eventos: un solo listener en el documento detecta clicks
+    // en CUALQUIER imagen con la clase .lightbox-trigger, sin importar en qué
+    // PhotoGrid esté ni cuántos haya en la página.
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('lightbox-trigger')) {
+        const src = target.getAttribute('data-full-src') || '';
+        const alt = target.getAttribute('data-full-alt') || '';
+        if (src) open(src, alt);
+      }
+    });
+
+    closeBtn.addEventListener('click', close);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) close(); // clic fuera de la imagen también cierra
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  }
+
+  setup();
+</script>

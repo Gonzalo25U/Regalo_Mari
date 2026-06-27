@@ -17,9 +17,12 @@ const { nextHref } = Astro.props;
 
 <style>
   .view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
     gap: 18px;
-    max-width: 780px;
+    max-width: 520px;
     margin: 0 auto;
     padding: 0 16px;
   }
@@ -57,10 +60,15 @@ const { nextHref } = Astro.props;
 
   .scene-3d {
     width: min(360px, 100%);
+    max-width: 420px;
     aspect-ratio: 1 / 1;
     margin: 0 auto;
     margin-top: 10px;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 10px;
   }
 
   .scene-3d::before {
@@ -94,6 +102,7 @@ const { nextHref } = Astro.props;
   import * as THREE from 'three';
   import { gsap } from 'gsap';
   import { RoundedBoxGeometry } from 'three-stdlib';
+  import { navigate } from 'astro:transitions/client';
 
   function setup() {
     const canvas = document.getElementById('giftCanvas') as HTMLCanvasElement | null;
@@ -426,11 +435,22 @@ const { nextHref } = Astro.props;
       idleFloat.pause();
       idleSpin.pause();
 
+      const globalWindow = window as Window & {
+        __birthdayMusicStart?: () => Promise<void>;
+      };
+      if (typeof globalWindow.__birthdayMusicStart === 'function') {
+        void globalWindow.__birthdayMusicStart();
+      }
+
       const nextHref = canvas!.dataset.next;
 
       const tl = gsap.timeline({
         onComplete: () => {
-          if (nextHref) window.location.href = nextHref;
+          if (nextHref) {
+            window.setTimeout(() => {
+              void navigate(nextHref);
+            }, 1200);
+          }
         },
       });
 
