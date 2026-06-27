@@ -64,26 +64,37 @@
       lightbox!.setAttribute('aria-hidden', 'true');
     }
 
-    // delegación de eventos: un solo listener en el documento detecta clicks
-    // en CUALQUIER imagen con la clase .lightbox-trigger, sin importar en qué
-    // PhotoGrid esté ni cuántos haya en la página.
+    closeBtn.addEventListener('click', close);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) close();
+    });
+
+    // este listener de click SÍ se vuelve a registrar en cada navegación,
+    // pero como apunta al elemento <html> que persiste, no se acumula
+    (window as any).__lightboxOpen = open;
+  }
+
+  // el listener de click en las fotos se registra UNA SOLA VEZ,
+  // y siempre delega a la función open() más reciente vía window
+  if (!(window as any).__lightboxClickBound) {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('lightbox-trigger')) {
         const src = target.getAttribute('data-full-src') || '';
         const alt = target.getAttribute('data-full-alt') || '';
-        if (src) open(src, alt);
+        const openFn = (window as any).__lightboxOpen;
+        if (src && typeof openFn === 'function') openFn(src, alt);
       }
     });
-
-    closeBtn.addEventListener('click', close);
-    lightbox.addEventListener('click', (e) => {
-      if (e.target === lightbox) close(); // clic fuera de la imagen también cierra
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') close();
-    });
+    (window as any).__lightboxClickBound = true;
   }
 
-  setup();
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const lightbox = document.getElementById('lightbox');
+      lightbox?.classList.remove('is-open');
+    }
+  });
+
+  document.addEventListener('astro:page-load', setup);
 </script>

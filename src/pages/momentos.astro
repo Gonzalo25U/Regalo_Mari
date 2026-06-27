@@ -9,15 +9,15 @@ import Lightbox from '../components/Lightbox.astro';
   <Layout title="Para Mi amor, Feliz cumpleaños">
     <div class="snap-page" id="snapPage">
       <section class="block">
-          <FlowerRing count={20}>
+          <FlowerRing count={50} width={1200} height={1500}>
         <h2 class="block-title">Nuestro amor</h2>
         <p class="block-text">Cada foto, cada sonrisa, cada pequeño momento se va guardando sin que nos demos cuenta — y juntos van escribiendo nuestra historia de amor.</p>
-              <PhotoGrid photos={togetherPhotos} />
+              <PhotoGrid photos={loveStoryPhotos} />
           </FlowerRing>
       </section>
 
       <section class="block">
-          <FlowerRing count={20}>
+          <FlowerRing count={50} width={1200} height={1100}>
         <h2 class="block-title">Tiempo juntos</h2>
         <p class="block-text">Cada segundo a tu lado es un tesoro que no quiero dejar de contar.</p>
         <Counter />
@@ -25,7 +25,7 @@ import Lightbox from '../components/Lightbox.astro';
       </section>
 
       <section class="block">
-          <FlowerRing count={20}>
+          <FlowerRing count={50} width={1200} height={1500}>
         <h2 class="block-title">Por más comidas juntos</h2>
         <p class="block-text">Cada platillo compartido sabe mejor cuando lo comparto contigo.</p>
         <PhotoGrid photos={mealsPhotos} />
@@ -33,7 +33,7 @@ import Lightbox from '../components/Lightbox.astro';
       </section>
 
       <section class="block">
-          <FlowerRing count={20}>
+          <FlowerRing count={50} width={1200} height={1500}>
         <h2 class="block-title">Por más viajes juntos</h2>
         <p class="block-text">No importa el destino: contigo, hasta perdernos en el camino se vuelve mi lugar favorito.</p>
         <PhotoGrid photos={travelPhotos} />
@@ -41,7 +41,7 @@ import Lightbox from '../components/Lightbox.astro';
       </section>
 
       <section class="block">
-          <FlowerRing count={20}>
+          <FlowerRing count={50} width={1200} height={1300}>
         <h2 class="block-title">Nuestros momentos</h2>
         <p class="block-text">Cada instante juntos es un regalo para mí.</p>
         <PhotoGrid photos={togetherPhotos} />
@@ -49,7 +49,7 @@ import Lightbox from '../components/Lightbox.astro';
       </section>
 
       <section class="block block-final">
-          <FlowerRing count={20}>
+          <FlowerRing count={50} width={1200} height={1100}>
         <h2 class="block-title block-title--big">Te amaré por y para siempre</h2>
         <p class="block-text block-final-text">
           Cada día a tu lado es un regalo. Gracias por hacer de mi vida algo tan hermoso.
@@ -59,7 +59,7 @@ import Lightbox from '../components/Lightbox.astro';
       </section>
 
       <section class="block block-family">
-          <FlowerRing count={20}>
+
         <h2 class="block-title">De parte de su familia</h2>
         <p class="block-text family-text">
           Quiero aprovechar este espacio para decirte algo: Muchas gracias por estar al lado de mi hermano,
@@ -69,7 +69,7 @@ import Lightbox from '../components/Lightbox.astro';
         </p>
         <p class="family-sign">Con todo nuestro cariño</p>
         <p class="back-link"><a href="/nota">&larr; volver a la nota</a></p>
-          </FlowerRing>
+
       </section>
     </div>
     <Lightbox />
@@ -99,9 +99,9 @@ import Lightbox from '../components/Lightbox.astro';
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    max-width: 700px;
+    max-width: 920px;
     margin: 0 auto 2rem;
-    padding: 6vh 6vw;
+    padding: 6vh 4vw;
     text-align: center;
     scroll-snap-align: start;
     opacity: 0;

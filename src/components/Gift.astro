@@ -177,6 +177,14 @@ const { nextHref } = Astro.props;
       }
     });
   }
+    let animationId: number | null = null;
 
-  setup();
+  document.addEventListener('astro:before-swap', () => {
+    if (animationId !== null) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+  });
+
+  document.addEventListener('astro:page-load', setup);
 </script>
