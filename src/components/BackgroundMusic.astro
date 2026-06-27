@@ -1,0 +1,69 @@
+---
+interface Props {
+  src: string;
+}
+const { src } = Astro.props;
+---
+<audio id="bgMusic" src={src} loop preload="auto"></audio>
+<button id="muteToggle" class="mute-toggle" aria-label="Silenciar música">♪</button>
+
+<style>
+  .mute-toggle {
+    position: fixed;
+    bottom: 18px; right: 18px;
+    z-index: 50;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(231,207,140,.4);
+    background: rgba(42,16,32,.7);
+    color: var(--gold-light);
+    font-size: 1.1rem;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: opacity .3s ease, transform .2s ease;
+    opacity: 0; /* aparece solo cuando la música ya empezó a sonar */
+    pointer-events: none;
+  }
+  .mute-toggle.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .mute-toggle:hover { transform: scale(1.08); }
+  .mute-toggle.is-muted { color: var(--rose); }
+</style>
+
+<script>
+  function setup() {
+    const audio = document.getElementById('bgMusic') as HTMLAudioElement | null;
+    const toggle = document.getElementById('muteToggle') as HTMLButtonElement | null;
+    if (!audio || !toggle) return;
+
+    audio.volume = 0.4;
+
+    // Intenta arrancar la música en la primera interacción real del usuario en TODA la página
+    // (click, touch o tecla) — así suena sin importar en qué página empiece la persona.
+    function tryStart() {
+      audio!.play().then(() => {
+        toggle!.classList.add('is-active');
+      }).catch(() => {
+        // el navegador todavía la bloqueó; se reintentará con la próxima interacción
+      });
+    }
+
+    ['click', 'touchstart', 'keydown'].forEach((evt) => {
+      document.addEventListener(evt, tryStart, { once: true });
+    });
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (audio.muted) {
+        audio.muted = false;
+        toggle.classList.remove('is-muted');
+      } else {
+        audio.muted = true;
+        toggle.classList.add('is-muted');
+      }
+    });
+  }
+  setup();
+</script>

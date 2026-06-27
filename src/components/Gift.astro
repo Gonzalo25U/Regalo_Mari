@@ -1,0 +1,169 @@
+---
+import '../styles/gift.css';
+
+interface Props {
+  nextHref: string;
+}
+const { nextHref } = Astro.props;
+---
+<section class="view">
+  <p class="eyebrow">para ti</p>
+  <h1 class="gift-title">Feliz cumpleaños, Mi amor</h1>
+  <p class="gift-sub">Hay algo esperándote adentro. Tócalo para abrirlo.</p>
+
+  <div class="scene">
+    <button class="gift3d" id="giftBtn" aria-label="Abrir el regalo" data-next={nextHref}>
+      <div class="gift-spin">
+        <div class="box-face box-top"></div>
+        <div class="box-face box-bottom"></div>
+        <div class="box-face box-front"></div>
+        <div class="box-face box-back"></div>
+        <div class="box-face box-left"></div>
+        <div class="box-face box-right"></div>
+
+        <div class="ribbon ribbon-front-v"></div>
+        <div class="ribbon ribbon-front-h"></div>
+        <div class="ribbon ribbon-left-v"></div>
+        <div class="ribbon ribbon-right-v"></div>
+
+        <div class="tag">
+          <div class="tag-string"></div>
+          <div class="tag-card">M</div>
+        </div>
+
+        <div class="lid">
+          <div class="lid-face lid-top"></div>
+          <div class="lid-face lid-front"></div>
+          <div class="lid-face lid-back"></div>
+          <div class="lid-face lid-left"></div>
+          <div class="lid-face lid-right"></div>
+          <div class="bow">
+            <svg viewBox="0 0 60 34" xmlns="http://www.w3.org/2000/svg">
+              <path d="M30 17 C28 8 14 2 4 7 C-2 10 0 19 8 20 C16 21 26 19 30 17 Z" fill="#dcb45c"/>
+              <path d="M30 17 C32 8 46 2 56 7 C62 10 60 19 52 20 C44 21 34 19 30 17 Z" fill="#c9a24b"/>
+              <path d="M30 17 C26 22 22 30 24 34 C26 31 29 27 30 23 C31 27 34 31 36 34 C38 30 34 22 30 17 Z" fill="#b08a3f"/>
+              <circle cx="30" cy="17" r="7" fill="#e7cf8c"/>
+              <circle cx="30" cy="17" r="7" fill="url(#bowShine)" opacity="0.5"/>
+              <defs>
+                <radialGradient id="bowShine" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%" stop-color="#fff7e0"/>
+                  <stop offset="100%" stop-color="#e7cf8c" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="burst" id="burst"></div>
+      <div class="ground-shadow"></div>
+    </button>
+  </div>
+  <p class="hint">toca el regalo</p>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  function setup() {
+    const giftBtn = document.getElementById('giftBtn') as HTMLButtonElement | null;
+    const spin = document.querySelector('.gift-spin') as HTMLElement | null;
+    const lid = document.querySelector('.lid') as HTMLElement | null;
+    const bow = document.querySelector('.bow') as HTMLElement | null;
+    const tag = document.querySelector('.tag') as HTMLElement | null;
+    const groundShadow = document.querySelector('.ground-shadow') as HTMLElement | null;
+    const burst = document.getElementById('burst');
+    if (!giftBtn || !spin || !lid || !bow || !burst || !groundShadow) return;
+
+    // ---------- animación idle: flota y gira solo, cada una en su propio loop ----------
+    const idleFloat = gsap.to(spin, {
+      y: -12, duration: 2.1, ease: 'sine.inOut', yoyo: true, repeat: -1,
+    });
+    const idleSpin = gsap.to(spin, {
+      rotateY: '+=360', duration: 13, ease: 'none', repeat: -1,
+    });
+    const idleTweens = [idleFloat, idleSpin];
+
+    // pausar el idle al pasar el mouse / enfocar
+    giftBtn.addEventListener('mouseenter', () => idleTweens.forEach(t => t.pause()));
+    giftBtn.addEventListener('mouseleave', () => {
+      if (!giftBtn.classList.contains('opened')) idleTweens.forEach(t => t.resume());
+    });
+    giftBtn.addEventListener('focus', () => idleTweens.forEach(t => t.pause()));
+    giftBtn.addEventListener('blur', () => {
+      if (!giftBtn.classList.contains('opened')) idleTweens.forEach(t => t.resume());
+    });
+
+    // ---------- chispas doradas ----------
+    function launchSparks() {
+      const count = 20;
+      for (let i = 0; i < count; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        burst!.appendChild(spark);
+
+        const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+        const dist = 70 + Math.random() * 70;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist - 40;
+
+        gsap.fromTo(spark,
+          { opacity: 1, scale: 1, x: 0, y: 0 },
+          {
+            opacity: 0, scale: 0.3, x: tx, y: ty,
+            duration: 0.9 + Math.random() * 0.3,
+            delay: Math.random() * 0.15,
+            ease: 'power2.out',
+            onComplete: () => spark.remove(),
+          }
+        );
+      }
+    }
+
+    // ---------- apertura: timeline de GSAP con rebote ----------
+    function openGift() {
+      if (giftBtn!.classList.contains('opened')) return;
+      giftBtn!.classList.add('opened');
+      idleTweens.forEach(t => t.pause());
+
+      const openTl = gsap.timeline({
+        onComplete: () => {
+          const next = giftBtn!.dataset.next;
+          if (next) window.location.href = next;
+        },
+      });
+
+      openTl
+        // la caja se asienta y crece un poco, como si algo empujara desde adentro
+        .to(spin, { rotateX: -14, scale: 1.08, y: 8, duration: 0.4, ease: 'power2.out' })
+        // la tapa sale volando con rebote
+        .to(lid, {
+          x: 46, y: -160, rotateX: 75, rotateZ: 40, opacity: 0,
+          duration: 0.7, ease: 'back.in(1.4)',
+        }, 0.05)
+        .to(bow, {
+          y: -24, scale: 0.65, rotate: 25, opacity: 0,
+          duration: 0.5, ease: 'power1.in',
+        }, 0.05)
+        .call(() => launchSparks(), [], 0.45)
+        // la sombra del suelo se expande
+        .to(groundShadow, { scale: 1.6, opacity: 0.32, duration: 0.5 }, 0.1)
+        // pulso de luz en la caja al abrirse
+        .to(spin, { filter: 'brightness(1.5)', duration: 0.25, ease: 'power1.in' }, 0.55)
+        .to(spin, { filter: 'brightness(1)', duration: 0.3, ease: 'power1.out' }, 0.8)
+        // pausa antes de navegar, para que se vea el destello completo
+        .to({}, { duration: 0.5 });
+
+      if (tag) openTl.to(tag, { opacity: 0, duration: 0.3 }, 0);
+    }
+
+    giftBtn.addEventListener('click', openGift);
+    giftBtn.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openGift();
+      }
+    });
+  }
+
+  setup();
+</script>

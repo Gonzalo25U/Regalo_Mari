@@ -1,0 +1,242 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Counter from '../components/Counter.astro';
+import PhotoGrid from '../components/PhotoGrid.astro';
+import FlowerRing from '../components/FlowerRing.astro';
+import { loveStoryPhotos, mealsPhotos, travelPhotos, togetherPhotos } from '../data/photos';
+---
+<Layout title="Para Mi amor, Feliz cumpleaños">
+  <div class="snap-page" id="snapPage">
+    <section class="block">
+        <FlowerRing count={20}>
+      <h2 class="block-title">Nuestro amor</h2>
+      <p class="block-text">Cada foto, cada sonrisa, cada pequeño momento se va guardando sin que nos demos cuenta — y juntos van escribiendo nuestra historia de amor.</p>
+            <PhotoGrid photos={togetherPhotos} />
+        </FlowerRing>
+    </section>
+
+    <section class="block">
+        <FlowerRing count={20}>
+      <h2 class="block-title">Tiempo juntos</h2>
+      <p class="block-text">Cada segundo a tu lado es un tesoro que no quiero dejar de contar.</p>
+      <Counter />
+      </FlowerRing>
+    </section>
+
+    <section class="block">
+        <FlowerRing count={20}>
+      <h2 class="block-title">Por más comidas juntos</h2>
+      <p class="block-text">Cada platillo compartido sabe mejor cuando lo comparto contigo.</p>
+      <PhotoGrid photos={mealsPhotos} />
+        </FlowerRing>
+    </section>
+
+    <section class="block">
+        <FlowerRing count={20}>
+      <h2 class="block-title">Por más viajes juntos</h2>
+      <p class="block-text">No importa el destino: contigo, hasta perdernos en el camino se vuelve mi lugar favorito.</p>
+      <PhotoGrid photos={travelPhotos} />
+        </FlowerRing>
+    </section>
+
+    <section class="block">
+        <FlowerRing count={20}>
+      <h2 class="block-title">Nuestros momentos</h2>
+      <p class="block-text">Cada instante juntos es un regalo para mí.</p>
+      <PhotoGrid photos={togetherPhotos} />
+        </FlowerRing>
+    </section>
+
+    <section class="block block-final">
+        <FlowerRing count={20}>
+      <h2 class="block-title block-title--big">Te amaré por y para siempre</h2>
+      <p class="block-text block-final-text">
+        Cada día a tu lado es un regalo. Gracias por hacer de mi vida algo tan hermoso.
+        Prometo amarte hoy, mañana, y siempre.
+      </p>
+      </FlowerRing>
+    </section>
+
+    <section class="block block-family">
+        <FlowerRing count={20}>
+      <h2 class="block-title">De parte de su familia</h2>
+      <p class="block-text family-text">
+        Quiero aprovechar este espacio para decirte algo: Muchas gracias por estar al lado de mi hermano,
+        por elegir compartir tu vida con la de él. Desde que te conocimos, lo hemos visto mucho más feliz,
+        más tranquilo, más él mismo. Lo has convertido en la mejor versión de él, y eso es algo que te agradecemos desde el fondo de nuestros corazones.
+        Gracias por cuidarlo como lo cuidas, por quererlo como lo quieres, y por ser parte de nuestra historia ahora también.
+      </p>
+      <p class="family-sign">Con todo nuestro cariño</p>
+      <p class="back-link"><a href="/nota">&larr; volver a la nota</a></p>
+        </FlowerRing>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  /* el contenedor con scroll propio: cada hijo .block "encaja" en pantalla al scrollear */
+  .snap-page {
+    height: 100vh;
+    overflow-y: auto;
+    scroll-snap-type: y proximity;
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* mientras esta página está activa, que el scroll del documento lo maneje .snap-page, no el body */
+  :global(html), :global(body) {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .block {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    padding: 6vh 6vw;
+    text-align: center;
+    scroll-snap-align: start;
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 224, 163, 0.12);
+    backdrop-filter: blur(12px);
+    border-radius: 28px;
+    box-shadow: 0 35px 75px rgba(0, 0, 0, 0.18);
+  }
+  .block.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .block-title {
+    font-family: 'Snell Roundhand', 'Brush Script MT', cursive;
+    font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+    color: var(--gold-light);
+    margin-bottom: 16px;
+    text-shadow: 0 0 22px rgba(255, 224, 163, .34);
+    letter-spacing: 0.01em;
+  }
+  .block-text {
+    font-size: 1.4rem;
+    line-height: 1.9;
+    color: var(--cream);
+    opacity: .97;
+    max-width: 58ch;
+  }
+
+  .block-title--big {
+    font-size: clamp(2.8rem, 7vw, 4.4rem);
+    text-shadow: 0 0 28px rgba(255, 224, 163, .45);
+    max-width: 90ch;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+  }
+  .block-final-text {
+    font-size: 1.5rem; max-width: 50ch; margin: 0 auto;
+  }
+
+  .block-family {
+    background: rgba(251,246,236,.05);
+    border-radius: 12px;
+  }
+  .family-text {
+    text-align: left;
+    font-size: 1.12rem;
+    line-height: 1.95;
+  }
+  .family-sign {
+    margin-top: 22px; text-align: right; width: 100%;
+    font-family: 'Snell Roundhand', 'Brush Script MT', cursive;
+    font-size: 1.3rem; color: var(--gold-light);
+  }
+  .back-link { margin-top: 30px; }
+
+  .balloon-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .balloon {
+    position: absolute;
+    bottom: -60px;
+    width: 34px;
+    height: 42px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    opacity: 0;
+    animation-name: balloonRise;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+  }
+  .balloon::after {
+    content: "";
+    position: absolute;
+    bottom: -14px; left: 50%;
+    width: 1px; height: 14px;
+    background: rgba(255,255,255,.4);
+    transform: translateX(-50%);
+  }
+  @keyframes balloonRise {
+    0%   { opacity: 0; transform: translateY(0) scale(.7); }
+    15%  { opacity: .9; }
+    100% { opacity: 0; transform: translateY(-70vh) scale(1); }
+  }
+</style>
+
+<script>
+  function setup() {
+    const container = document.getElementById('snapPage');
+    const blocks = document.querySelectorAll<HTMLElement>('.block');
+    if (!container || !blocks.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            spawnBalloons(entry.target as HTMLElement);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { root: container, threshold: 0.35 }
+    );
+
+    blocks.forEach((block) => observer.observe(block));
+  }
+
+  function spawnBalloons(container: HTMLElement) {
+    const colors = ['#ff8c69', '#ff9eb0', '#e0a847', '#c8a4e0'];
+    const layer = document.createElement('div');
+    layer.className = 'balloon-layer';
+    container.appendChild(layer);
+
+    for (let i = 0; i < 6; i++) {
+      const balloon = document.createElement('div');
+      balloon.className = 'balloon';
+      balloon.style.left = (10 + Math.random() * 80) + '%';
+      balloon.style.background = colors[i % colors.length];
+      balloon.style.animationDelay = (Math.random() * 0.4) + 's';
+      balloon.style.animationDuration = (2.6 + Math.random() * 1.2) + 's';
+      layer.appendChild(balloon);
+    }
+
+    setTimeout(() => layer.remove(), 4200);
+  }
+
+  setup();
+</script>

@@ -1,0 +1,91 @@
+---
+interface Props {
+  count?: number;
+}
+const { count = 12 } = Astro.props;
+
+// Posiciones en una elipse (más ancha que alta, porque el contenido suele ser rectangular)
+// calculadas en build time, igual que con las estrellas.
+const flowers = Array.from({ length: count }, (_, i) => {
+  const angle = (i / count) * Math.PI * 2;
+  const radiusX = 80; // % horizontal
+  const radiusY = 55; // % vertical
+  return {
+    left: 50 + Math.cos(angle) * radiusX,
+    top: 50 + Math.sin(angle) * radiusY,
+    rotation: (angle * 180) / Math.PI + 90,
+    hue: ['rose', 'gold', 'lavender'][i % 3],
+    scale: 0.8 + Math.random() * 0.4,
+  };
+});
+---
+<div class="flower-ring-wrap">
+  <div class="flower-ring" aria-hidden="true">
+    {flowers.map((f) => (
+      <div
+        class={`flower flower-${f.hue}`}
+        style={`left:${f.left}%; top:${f.top}%; transform: translate(-50%, -50%) rotate(${f.rotation}deg) scale(${f.scale});`}
+      >
+        <span class="petal"></span>
+        <span class="petal"></span>
+        <span class="petal"></span>
+        <span class="petal"></span>
+        <span class="petal"></span>
+        <span class="flower-center"></span>
+      </div>
+    ))}
+  </div>
+  <div class="flower-ring-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .flower-ring-wrap {
+    position: relative;
+    padding: 56px 40px;
+    width: 100%;
+  }
+  .flower-ring {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .flower-ring-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .flower {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+  }
+  .petal {
+    position: absolute;
+    width: 12px;
+    height: 16px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    left: 7px;
+    top: 0;
+    transform-origin: bottom center;
+  }
+  .petal:nth-child(1) { transform: rotate(0deg); }
+  .petal:nth-child(2) { transform: rotate(72deg); }
+  .petal:nth-child(3) { transform: rotate(144deg); }
+  .petal:nth-child(4) { transform: rotate(216deg); }
+  .petal:nth-child(5) { transform: rotate(288deg); }
+
+  .flower-center {
+    position: absolute;
+    left: 9px; top: 9px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold-light);
+  }
+
+  .flower-rose .petal { background: var(--rose); opacity: .85; }
+  .flower-gold .petal { background: var(--gold); opacity: .85; }
+  .flower-lavender .petal { background: var(--lavender); opacity: .85; }
+</style>

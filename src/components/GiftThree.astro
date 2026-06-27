@@ -1,0 +1,463 @@
+---
+interface Props {
+  nextHref: string;
+}
+const { nextHref } = Astro.props;
+---
+<section class="view">
+  <p class="eyebrow">para ti</p>
+  <h1 class="gift-title">Feliz cumpleaños, Mi amor</h1>
+  <p class="gift-sub">Hay algo esperándote adentro. Tócalo para abrirlo.</p>
+
+  <div class="scene-3d">
+    <canvas id="giftCanvas" data-next={nextHref}></canvas>
+  </div>
+  <p class="hint">toca el regalo</p>
+</section>
+
+<style>
+  .view {
+    text-align: center;
+    gap: 18px;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .eyebrow {
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    font-family: Georgia, serif;
+    font-size: .78rem;
+    color: var(--gold-light);
+    opacity: .9;
+    text-shadow: 0 0 10px rgba(255, 224, 163, .16);
+  }
+
+  .gift-title {
+    font-family: 'Snell Roundhand', 'Brush Script MT', cursive;
+    font-size: clamp(2.8rem, 6vw, 4.4rem);
+    color: var(--gold-light);
+    font-weight: 400;
+    line-height: 1.02;
+    text-shadow: 0 0 30px rgba(255, 224, 163, .35);
+    max-width: 12ch;
+    margin: 0 auto;
+  }
+
+  .gift-sub {
+    font-size: clamp(1.05rem, 2vw, 1.28rem);
+    color: var(--cream);
+    opacity: .96;
+    max-width: 42ch;
+    line-height: 1.75;
+    margin: 0 auto;
+    text-shadow: 0 0 12px rgba(0, 0, 0, .08);
+  }
+
+  .scene-3d {
+    width: min(360px, 100%);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    margin-top: 10px;
+    position: relative;
+  }
+
+  .scene-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    background: radial-gradient(circle at 50% 30%, rgba(255, 224, 163, .18), transparent 42%);
+    pointer-events: none;
+  }
+
+  #giftCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 28px;
+    box-shadow: 0 38px 80px rgba(0, 0, 0, .24);
+  }
+
+  .hint {
+    font-size: .92rem;
+    color: var(--gold-light);
+    opacity: .92;
+    letter-spacing: .08em;
+    margin-top: 30px;
+    text-transform: uppercase;
+  }
+</style>
+
+<script>
+  import * as THREE from 'three';
+  import { gsap } from 'gsap';
+  import { RoundedBoxGeometry } from 'three-stdlib';
+
+  function setup() {
+    const canvas = document.getElementById('giftCanvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+
+    const width = 320;
+    const height = 320;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
+    camera.position.set(2.4, 2.0, 3.4);
+    camera.lookAt(0, 0.2, 0);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+
+    const giftGroup = new THREE.Group();
+    scene.add(giftGroup);
+
+    // ---------- textura de papel de regalo con lunares, generada en un canvas ----------
+    function createWrappingPaperTexture(baseColor: string, dotColor: string) {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d')!;
+      ctx.fillStyle = baseColor;
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.fillStyle = dotColor;
+      const spacing = 42;
+      for (let y = 0; y < 256 + spacing; y += spacing) {
+        for (let x = 0; x < 256 + spacing; x += spacing) {
+          const offset = (Math.floor(y / spacing) % 2) * (spacing / 2);
+          ctx.beginPath();
+          ctx.arc(x + offset, y, 7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      const texture = new THREE.CanvasTexture(c);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(2, 2);
+      return texture;
+    }
+
+    // ---------- materiales ----------
+    const boxMaterial = new THREE.MeshStandardMaterial({
+      map: createWrappingPaperTexture('#d98a96', '#f0bcc5'),
+      roughness: 0.6, metalness: 0.05,
+    });
+    const ribbonMaterial = new THREE.MeshStandardMaterial({ color: 0xc9a24b, roughness: 0.35, metalness: 0.6 });
+    const lidMaterial = new THREE.MeshStandardMaterial({
+      map: createWrappingPaperTexture('#c0717f', '#e8a0ad'),
+      roughness: 0.55, metalness: 0.05,
+    });
+    const bowMaterial = new THREE.MeshStandardMaterial({ color: 0xffd39f, roughness: 0.22, metalness: 0.7 });
+    const knotMaterial = new THREE.MeshStandardMaterial({ color: 0xffe9c4, roughness: 0.15, metalness: 0.88 });
+
+    // ---------- cuerpo (con esquinas redondeadas) ----------
+    const body = new THREE.Mesh(new RoundedBoxGeometry(1.5, 1.0, 1.5, 4, 0.07), boxMaterial);
+    body.castShadow = true;
+    body.receiveShadow = true;
+    giftGroup.add(body);
+
+    const ribbonV = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1.02, 1.52), ribbonMaterial);
+    ribbonV.castShadow = true;
+    giftGroup.add(ribbonV);
+
+    const ribbonH = new THREE.Mesh(new THREE.BoxGeometry(1.52, 1.02, 0.22), ribbonMaterial);
+    ribbonH.castShadow = true;
+    giftGroup.add(ribbonH);
+
+    // ---------- tapa (grupo aparte, esto es lo que vamos a animar al abrir) ----------
+    const lidGroup = new THREE.Group();
+    lidGroup.position.y = 0.5 + 0.18;
+    giftGroup.add(lidGroup);
+
+    const lid = new THREE.Mesh(new RoundedBoxGeometry(1.62, 0.36, 1.62, 4, 0.06), lidMaterial);
+    lid.castShadow = true;
+    lid.receiveShadow = true;
+    lidGroup.add(lid);
+
+    const lidRibbonV = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.38, 1.64), ribbonMaterial);
+    lidRibbonV.position.y = 0.06;
+    lidRibbonV.castShadow = true;
+    lidGroup.add(lidRibbonV);
+
+    const lidRibbonH = new THREE.Mesh(new THREE.BoxGeometry(1.64, 0.38, 0.24), ribbonMaterial);
+    lidRibbonH.position.y = 0.06;
+    lidRibbonH.castShadow = true;
+    lidGroup.add(lidRibbonH);
+
+    // ---------- interior: cavidad oscura + luz cálida que se revela al abrir ----------
+    const interiorMaterial = new THREE.MeshStandardMaterial({
+      color: 0x2a1118, roughness: 0.9, metalness: 0,
+    });
+    const interior = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.1, 1.3), interiorMaterial);
+    interior.position.y = 0.46;
+    giftGroup.add(interior);
+
+    const glowLight = new THREE.PointLight(0xffd9a0, 0, 2.2);
+    glowLight.position.y = 0.55;
+    giftGroup.add(glowLight);
+
+    // ---------- lazo ----------
+    const loopGeo = new THREE.TorusGeometry(0.25, 0.095, 20, 40);
+
+    const loopLeft = new THREE.Mesh(loopGeo, bowMaterial);
+    loopLeft.rotation.x = Math.PI / 2;
+    loopLeft.rotation.z = 0.62;
+    loopLeft.position.set(-0.18, 0.23, 0.02);
+    loopLeft.scale.set(1.08, 1.08, 0.94);
+    loopLeft.castShadow = true;
+    lidGroup.add(loopLeft);
+
+    const loopRight = new THREE.Mesh(loopGeo, bowMaterial);
+    loopRight.rotation.x = Math.PI / 2;
+    loopRight.rotation.z = -0.62;
+    loopRight.position.set(0.18, 0.23, 0.02);
+    loopRight.scale.set(1.08, 1.08, 0.94);
+    loopRight.castShadow = true;
+    lidGroup.add(loopRight);
+
+    const knot = new THREE.Mesh(new THREE.SphereGeometry(0.15, 28, 28), knotMaterial);
+    knot.position.set(0, 0.2, 0.05);
+    knot.castShadow = true;
+    lidGroup.add(knot);
+
+    const tailLeft = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.38, 0.065), bowMaterial);
+    tailLeft.position.set(-0.18, -0.14, 0.02);
+    tailLeft.rotation.z = -0.42;
+    tailLeft.castShadow = true;
+    lidGroup.add(tailLeft);
+
+    const tailRight = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.38, 0.065), bowMaterial);
+    tailRight.position.set(0.18, -0.14, 0.02);
+    tailRight.rotation.z = 0.42;
+    tailRight.castShadow = true;
+    lidGroup.add(tailRight);
+
+    function makeTail(angleZ: number, angleX: number) {
+      const tail = new THREE.Group();
+      tail.position.set(0, 0.18, 0.05);
+      const upper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.32, 0.03), bowMaterial);
+      upper.position.y = -0.14;
+      upper.rotation.z = angleZ;
+      upper.castShadow = true;
+      tail.add(upper);
+      const lower = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.28, 0.03), bowMaterial);
+      lower.position.set(Math.sin(angleZ) * 0.22, -0.38, 0);
+      lower.rotation.z = angleZ + angleX;
+      lower.castShadow = true;
+      tail.add(lower);
+      return tail;
+    }
+    lidGroup.add(makeTail(0.35, 0.5));
+    lidGroup.add(makeTail(-0.35, -0.5));
+
+    gsap.to(loopLeft.rotation, {
+      z: 0.7,
+      duration: 4.2,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    });
+    gsap.to(loopRight.rotation, {
+      z: -0.7,
+      duration: 4.2,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    });
+    gsap.to([tailLeft.rotation, tailRight.rotation], {
+      x: '+=0.08',
+      duration: 4.4,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    });
+
+    // ---------- luces ----------
+    const keyLight = new THREE.DirectionalLight(0xfff3e0, 2.4);
+    keyLight.position.set(3, 4.5, 2.5);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(1024, 1024);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xffd9e0, 0.9);
+    fillLight.position.set(-3, 1.5, -2);
+    scene.add(fillLight);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 8),
+      new THREE.ShadowMaterial({ opacity: 0.35 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.51;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // ---------- partículas doradas (se crean ocultas, se activan al abrir) ----------
+    const sparkMaterial = new THREE.MeshBasicMaterial({ color: 0xe7cf8c, transparent: true });
+    const sparkGeo = new THREE.SphereGeometry(0.045, 8, 8);
+    const sparks: THREE.Mesh[] = [];
+    const SPARK_COUNT = 30;
+    for (let i = 0; i < SPARK_COUNT; i++) {
+      const spark = new THREE.Mesh(sparkGeo, sparkMaterial.clone());
+      spark.position.set(0, 0.55, 0);
+      spark.visible = false;
+      scene.add(spark);
+      sparks.push(spark);
+    }
+
+    // ---------- geometría de un corazón, hecha con curvas (igual lógica que un SVG path) ----------
+    function createHeartGeometry() {
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0.3);
+      shape.bezierCurveTo(0, 0.45, -0.15, 0.6, -0.35, 0.6);
+      shape.bezierCurveTo(-0.6, 0.6, -0.6, 0.3, -0.6, 0.3);
+      shape.bezierCurveTo(-0.6, 0.05, -0.35, -0.15, 0, -0.45);
+      shape.bezierCurveTo(0.35, -0.15, 0.6, 0.05, 0.6, 0.3);
+      shape.bezierCurveTo(0.6, 0.3, 0.6, 0.6, 0.35, 0.6);
+      shape.bezierCurveTo(0.15, 0.6, 0, 0.45, 0, 0.3);
+      return new THREE.ExtrudeGeometry(shape, { depth: 0.12, bevelEnabled: true, bevelSize: 0.02, bevelThickness: 0.02, bevelSegments: 2 });
+    }
+    const heartGeo = createHeartGeometry();
+    heartGeo.scale(0.18, 0.18, 0.18);
+
+    function launchSparks() {
+      sparks.forEach((spark, i) => {
+        const angle = (Math.PI * 2 * i) / sparks.length + Math.random() * 0.3;
+        const radius = 0.9 + Math.random() * 0.6;
+        const targetX = Math.cos(angle) * radius;
+        const targetZ = Math.sin(angle) * radius;
+        const targetY = 0.55 + 0.6 + Math.random() * 0.4;
+
+        spark.position.set(0, 0.55, 0);
+        (spark.material as THREE.MeshBasicMaterial).opacity = 1;
+        spark.visible = true;
+        spark.scale.setScalar(1);
+
+        gsap.to(spark.position, {
+          x: targetX, y: targetY, z: targetZ,
+          duration: 0.9 + Math.random() * 0.3,
+          delay: Math.random() * 0.15,
+          ease: 'power2.out',
+        });
+        gsap.to(spark.scale, {
+          x: 0.2, y: 0.2, z: 0.2,
+          duration: 0.9 + Math.random() * 0.3,
+          delay: Math.random() * 0.15,
+          ease: 'power2.out',
+        });
+        gsap.to(spark.material, {
+          opacity: 0,
+          duration: 0.9 + Math.random() * 0.3,
+          delay: Math.random() * 0.15,
+          ease: 'power2.out',
+          onComplete: () => { spark.visible = false; },
+        });
+      });
+    }
+
+    // ---------- corazones (se crean ocultos, se activan al abrir) ----------
+    const heartMaterial = new THREE.MeshStandardMaterial({
+      color: 0xe8657a, roughness: 0.4, metalness: 0.1, transparent: true,
+    });
+    const hearts: THREE.Mesh[] = [];
+    const HEART_COUNT = 30;
+    for (let i = 0; i < HEART_COUNT; i++) {
+      const heart = new THREE.Mesh(heartGeo, heartMaterial.clone());
+      heart.visible = false;
+      scene.add(heart);
+      hearts.push(heart);
+    }
+
+    function launchHearts() {
+      hearts.forEach((heart, i) => {
+        const angle = (Math.PI * 2 * i) / hearts.length + Math.random() * 0.5;
+        const radius = 0.5 + Math.random() * 0.5;
+        const targetX = Math.cos(angle) * radius;
+        const targetZ = Math.sin(angle) * radius;
+        const targetY = 1.3 + Math.random() * 0.8;
+
+        heart.position.set(0, 0.5, 0);
+        heart.rotation.set(0, Math.random() * Math.PI, 0);
+        heart.scale.setScalar(1);
+        (heart.material as THREE.MeshStandardMaterial).opacity = 1;
+        heart.visible = true;
+
+        gsap.to(heart.position, {
+          x: targetX, y: targetY, z: targetZ,
+          duration: 1.3 + Math.random() * 0.4,
+          delay: 0.1 + Math.random() * 0.25,
+          ease: 'power1.out',
+        });
+        gsap.to(heart.rotation, {
+          y: heart.rotation.y + Math.PI * 1.5,
+          x: Math.random() * 0.6 - 0.3,
+          duration: 1.6,
+          delay: 0.1 + Math.random() * 0.25,
+          ease: 'sine.inOut',
+        });
+        gsap.to(heart.material, {
+          opacity: 0,
+          duration: 1.0,
+          delay: 0.6 + Math.random() * 0.3,
+          ease: 'power1.in',
+          onComplete: () => { heart.visible = false; },
+        });
+      });
+    }
+
+    // ---------- animación idle ----------
+    const idleFloat = gsap.to(giftGroup.position, {
+      y: 0.18, duration: 2.1, ease: 'sine.inOut', yoyo: true, repeat: -1,
+    });
+    const idleSpin = gsap.to(giftGroup.rotation, {
+      y: Math.PI * 2, duration: 13, ease: 'none', repeat: -1,
+    });
+
+    // ---------- apertura ----------
+    let opened = false;
+    function openGift() {
+      if (opened) return;
+      opened = true;
+      idleFloat.pause();
+      idleSpin.pause();
+
+      const nextHref = canvas!.dataset.next;
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          if (nextHref) window.location.href = nextHref;
+        },
+      });
+
+      tl
+        .to(giftGroup.scale, { x: 1.06, y: 1.06, z: 1.06, duration: 0.35, ease: 'power2.out' })
+        .to(lidGroup.position, { y: 1.5, duration: 0.7, ease: 'back.in(1.3)' }, 0.05)
+        .to(lidGroup.rotation, { x: 1.3, z: 0.8, duration: 0.7, ease: 'power2.in' }, 0.05)
+        .to(lidGroup.scale, {
+          x: 0.01, y: 0.01, z: 0.01, duration: 0.3, ease: 'power1.in',
+          onComplete: () => { lidGroup.visible = false; },
+        }, 0.55)
+        .call(() => launchSparks(), [], 0.4)
+        .call(() => launchHearts(), [], 0.5)
+        .to(glowLight, { intensity: 2.5, duration: 0.4, ease: 'power1.out' }, 0.45)
+        .to({}, { duration: 0.6 });
+    }
+
+    canvas.addEventListener('click', openGift);
+    canvas.style.cursor = 'pointer';
+
+    // ---------- loop de render ----------
+    function tick() {
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  setup();
+</script>

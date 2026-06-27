@@ -1,0 +1,52 @@
+---
+// Generamos posiciones y tipos en build time, igual que con las estrellas.
+const SYMBOLS = ['♥', '✦', '♥', '✧', '♥'];
+const items = Array.from({ length: 22 }, () => ({
+  left: Math.random() * 100,
+  symbol: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+  size: 5 + Math.random() * 2.2,   // antes: 0.7 + Math.random() * 1.1
+  duration: 14 + Math.random() * 9.5,
+  delay: Math.random() * 12,
+  hue: Math.random() > 0.5 ? 'rose' : 'gold',
+}));
+---
+<div class="floating-bg" aria-hidden="true">
+  {items.map((it) => (
+    <span
+      class={`floating-item floating-${it.hue}`}
+      style={`left:${it.left}%; font-size:${it.size}rem; animation-duration:${it.duration}s; animation-delay:${it.delay}s;`}
+    >{it.symbol}</span>
+  ))}
+</div>
+
+<style>
+  .floating-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .floating-item {
+    position: absolute;
+    bottom: -10%;
+    opacity: 0;
+    animation-name: floatUp;
+    animation-timing-function: ease-in;
+    animation-iteration-count: infinite;
+  }
+  .floating-rose { color: var(--rose); }
+  .floating-gold { color: var(--gold-light); }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: .55; }
+    50%  { transform: translateY(-55vh) translateX(20px) rotate(15deg); }
+    90%  { opacity: .35; }
+    100% { transform: translateY(-115vh) translateX(-15px) rotate(-10deg); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-item { animation: none; opacity: 0; }
+  }
+</style>

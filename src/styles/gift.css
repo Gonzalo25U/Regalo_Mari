@@ -1,0 +1,143 @@
+.view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 22px;
+}
+.eyebrow {
+  letter-spacing: .35em; text-transform: uppercase;
+  font-family: Georgia, serif; font-size: .7rem;
+  color: var(--gold-light); opacity: .8;
+}
+.gift-title {
+  font-family: 'Snell Roundhand', 'Brush Script MT', cursive;
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  color: var(--gold-light); font-weight: 400;
+  text-shadow: 0 0 18px rgba(201, 162, 75, .35);
+}
+.gift-sub {
+  font-size: 1rem; color: var(--rose); opacity: .85; max-width: 34ch; line-height: 1.5;
+}
+
+.scene {
+  width: min(100%, 320px);
+  height: 320px;
+  perspective: 1200px;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 6px;
+}
+.gift3d {
+  position: relative;
+  width: 160px; height: 160px;
+  background: none; border: none; cursor: pointer; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  transform-style: preserve-3d;
+}
+.gift3d:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 10px; border-radius: 8px; }
+
+.gift-spin {
+  position: absolute; left: 50%; top: 50%;
+  width: 150px; height: 150px;
+  margin: -75px 0 0 -75px;
+  transform-style: preserve-3d;
+  transform: rotateX(-16deg) rotateY(-28deg);
+}
+
+/* ---------- caras de la caja: color sólido por cara, sin filter() ----------
+   la luz "viene" de arriba-izquierda, por eso cada cara tiene su propio tono fijo */
+.box-face {
+  position: absolute; top: 0; left: 0;
+  width: 150px; height: 150px;
+  border: 1px solid rgba(0,0,0,.25);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.box-top    { background: #e7b7c0; transform: rotateX(90deg) translateZ(75px); }
+.box-front  { background: #d98a96; transform: translateZ(75px); }
+.box-right  { background: #c0717f; transform: rotateY(90deg) translateZ(75px); }
+.box-left   { background: #a85d6b; transform: rotateY(-90deg) translateZ(75px); }
+.box-back   { background: #8f4d59; transform: rotateY(180deg) translateZ(75px); }
+.box-bottom { background: #6e3a44; transform: rotateX(-90deg) translateZ(75px); }
+
+.ribbon {
+  position: absolute;
+  border: 1px solid rgba(0,0,0,.2);
+}
+.ribbon-front-v { top: 0; left: 64px; width: 22px; height: 150px; background: #d9b35c; transform: translateZ(76px); }
+.ribbon-front-h { top: 64px; left: 0; width: 150px; height: 22px; background: #d9b35c; transform: translateZ(76px); }
+.ribbon-left-v  { top: 0; left: 64px; width: 22px; height: 150px; background: #b08a3f; transform: rotateY(-90deg) translateZ(76px); }
+.ribbon-right-v { top: 0; left: 64px; width: 22px; height: 150px; background: #c9a24b; transform: rotateY(90deg) translateZ(76px); }
+
+/* ---------- etiqueta colgante ---------- */
+.tag {
+  position: absolute;
+  top: -2px; left: 118px;
+  width: 34px; height: 60px;
+  transform: translateZ(78px) rotate(8deg);
+  transform-origin: top center;
+}
+.tag-string {
+  width: 1px; height: 14px; margin: 0 auto;
+  background: rgba(231,207,140,.8);
+}
+.tag-card {
+  width: 30px; height: 22px; margin-top: 2px;
+  background: var(--paper);
+  border-radius: 3px 3px 3px 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,.35);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Snell Roundhand', 'Brush Script MT', cursive;
+  color: var(--rose-deep); font-size: 1.1rem;
+  position: relative;
+}
+.tag-card::before {
+  content: ""; position: absolute; left: 5px; top: 50%; transform: translateY(-50%);
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--plum-deep);
+}
+
+/* ---------- tapa ---------- */
+.lid {
+  position: absolute;
+  top: -52px; left: -6px;
+  width: 162px; height: 52px;
+  transform-style: preserve-3d;
+}
+.lid-face {
+  position: absolute; top: 0; left: 0;
+  border: 1px solid rgba(0,0,0,.25);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.lid-front { width: 162px; height: 52px; background: #c0717f; transform: translateZ(81px); }
+.lid-right { width: 162px; height: 52px; background: #a85d6b; transform: rotateY(90deg) translateZ(81px); }
+.lid-left  { width: 162px; height: 52px; background: #8f4d59; transform: rotateY(-90deg) translateZ(81px); }
+.lid-back  { width: 162px; height: 52px; background: #6e3a44; transform: rotateY(180deg) translateZ(81px); }
+.lid-top   { width: 162px; height: 162px; background: #f0c4cc; transform: rotateX(90deg) translateZ(26px); }
+
+.bow {
+  position: absolute; top: -22px; left: 50%;
+  width: 68px; height: 38px;
+  transform: translateX(-50%) translateZ(82px);
+}
+.bow svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 10px 10px rgba(0,0,0,.5)); }
+
+.ground-shadow {
+  position: absolute; left: 50%; bottom: -36px; transform: translateX(-50%);
+  width: 180px; height: 28px; border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.6), transparent 70%);
+  filter: blur(3px);
+}
+
+.burst { position: absolute; left: 50%; top: 30%; width: 1px; height: 1px; pointer-events: none; }
+.spark {
+  position: absolute; left: 0; top: 0;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold-light);
+  opacity: 0;
+  box-shadow: 0 0 8px 2px rgba(231,207,140,.7);
+}
+
+.hint { font-size: .8rem; color: var(--gold-light); opacity: .7; letter-spacing: .05em; margin-top: 34px; transition: opacity 0.3s ease; }

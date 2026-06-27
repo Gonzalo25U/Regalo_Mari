@@ -12,6 +12,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.0.3"
+    "astro": "^7.0.3",
+    "canvas-confetti": "^1.9.4",
+    "gsap": "^3.15.0",
+    "three": "^0.185.0",
+    "three-stdlib": "^2.36.1"
+  },
+  "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/three": "^0.185.0"
   }
 }

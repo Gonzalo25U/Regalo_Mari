@@ -1,0 +1,64 @@
+---
+interface Props {
+  nextHref: string;
+}
+const { nextHref } = Astro.props;
+---
+<section class="view">
+  <article class="note-card">
+    <p class="note-greeting">Mi amor</p>
+    <p class="note-body">
+      Hoy el mundo se puso un poco más bonito porque es tu día. Quiero que sepas que cada año a tu lado se siente como encontrar una razón nueva para quererte más: tu risa que se escucha desde la otra punta de la casa, la forma en que cuidas a quienes quieres, y esa manera tan tuya de hacer que los días difíciles pesen menos.
+      <br /><br />
+      Gracias por elegirme, por construir esto conmigo, y por seguir soñando despierta junto a mí. Que este nuevo año te traiga todo lo que mereces, que es mucho.
+      <br /><br />
+      Hay más personas que también quieren decirte algo hoy.
+    </p>
+    <p class="note-sign">Con todo mi cariño <span>tu compañero de vida</span></p>
+
+    <a class="heart-btn" href={nextHref} aria-label="Ver agradecimientos de tus seres queridos">
+      <span class="heart-shape">
+        <svg viewBox="0 0 32 28" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 27 C16 27 1 17.5 1 8.5 C1 3.5 5 0.5 9 0.5 C12.5 0.5 15 3 16 5.5 C17 3 19.5 0.5 23 0.5 C27 0.5 31 3.5 31 8.5 C31 17.5 16 27 16 27 Z" fill="#d4435a"/>
+        </svg>
+      </span>
+    </a>
+  </article>
+</section>
+
+<style>
+  .view{ text-align:center; }
+  .note-card{
+    background:var(--paper); color:var(--ink);
+    max-width:560px; width:100%;
+    padding:48px 38px 38px;
+    border-radius:3px;
+    position:relative;
+    box-shadow:0 30px 60px rgba(0,0,0,.5);
+    transform:translateY(18px) scale(.97) rotate(-0.4deg);
+    opacity:0;
+    animation:noteIn .7s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes noteIn{ to{ opacity:1; transform:translateY(0) scale(1) rotate(0); } }
+  .note-card::before{
+    content:""; position:absolute; top:-14px; left:50%; transform:translateX(-50%) rotate(45deg);
+    width:26px; height:26px; background:var(--gold); box-shadow:0 4px 10px rgba(0,0,0,.3);
+  }
+  .note-greeting{
+    font-family:'Snell Roundhand','Brush Script MT',cursive;
+    font-size:clamp(1.8rem,5vw,2.4rem); color:#7a2d3e; margin-bottom:18px;
+  }
+  .note-body{ font-size:1.05rem; line-height:1.85; text-align:left; margin-bottom:26px; }
+  .note-sign{ font-family:'Snell Roundhand','Brush Script MT',cursive; font-size:1.6rem; color:#7a2d3e; text-align:right; }
+  .note-sign span{ display:block; font-family:Georgia,serif; font-size:.7rem; letter-spacing:.1em; color:#9a7a55; text-transform:uppercase; margin-top:4px; }
+
+  .heart-btn{
+    margin-top:34px; background:none; border:none; cursor:pointer; text-decoration:none;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    color:var(--gold-light); font-family:Georgia,serif; font-size:.75rem; letter-spacing:.2em; text-transform:uppercase;
+  }
+  .heart-btn:focus-visible{ outline:3px solid var(--gold-light); outline-offset:6px; border-radius:8px; }
+  .heart-shape{ width:46px; height:42px; position:relative; transition:transform .25s ease; display:block; }
+  .heart-btn:hover .heart-shape, .heart-btn:focus-visible .heart-shape{ transform:scale(1.12); }
+  .heart-shape svg{ width:100%; height:100%; filter:drop-shadow(0 6px 14px rgba(201,67,90,.5)); }
+</style>
