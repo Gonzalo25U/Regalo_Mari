@@ -12,29 +12,47 @@ import { RELATIONSHIP_START } from '../data/relationship';
 
 <style>
   .counter {
-    display: flex; justify-content: center; gap: 8px;
-    flex-wrap: nowrap;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;        /* ← permite que bajen a segunda fila si no caben */
     margin-top: 26px;
-    overflow-x: auto;
     max-width: 100%;
-    padding-bottom: 4px;
+    padding: 0 4px 4px;
   }
   .counter-unit {
-    display: flex; flex-direction: column; align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     background: rgba(251, 246, 236, .08);
     border: 1px solid rgba(231, 207, 140, .25);
     border-radius: 8px;
-    padding: 10px 12px;
-    min-width: 56px;
-    flex-shrink: 0;
+    padding: 10px 10px;
+    min-width: 52px;
+    flex: 1 1 52px;         /* crece y se encoge, base 52px */
+    max-width: 72px;
   }
   .counter-num {
-    font-size: clamp(1.2rem, 4vw, 1.7rem); font-weight: bold; color: var(--gold-light);
+    font-size: clamp(1.1rem, 4vw, 1.7rem);
+    font-weight: bold;
+    color: var(--gold-light);
     font-family: Georgia, serif;
   }
   .counter-label {
-    font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--rose); margin-top: 4px;
+    font-size: .6rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+
+  /* En pantallas muy pequeñas, 3 por fila */
+  @media (max-width: 380px) {
+    .counter-unit {
+      flex: 1 1 calc(33% - 8px);
+      max-width: calc(33% - 8px);
+    }
   }
 </style>
 
@@ -45,23 +63,21 @@ import { RELATIONSHIP_START } from '../data/relationship';
     const start = new Date(el.dataset.start || '');
     if (isNaN(start.getTime())) return;
 
-    const yearsEl = document.getElementById('cYears');
+    const yearsEl  = document.getElementById('cYears');
     const monthsEl = document.getElementById('cMonths');
-    const daysEl = document.getElementById('cDays');
-    const hoursEl = document.getElementById('cHours');
-    const minsEl = document.getElementById('cMins');
-    const secsEl = document.getElementById('cSecs');
+    const daysEl   = document.getElementById('cDays');
+    const hoursEl  = document.getElementById('cHours');
+    const minsEl   = document.getElementById('cMins');
+    const secsEl   = document.getElementById('cSecs');
 
     function update() {
       const now = new Date();
 
-      // años y meses completos transcurridos desde la fecha de inicio
-      let years = now.getFullYear() - start.getFullYear();
-      let months = now.getMonth() - start.getMonth();
+      let years  = now.getFullYear() - start.getFullYear();
+      let months = now.getMonth()    - start.getMonth();
       if (now.getDate() < start.getDate()) months -= 1;
       if (months < 0) { years -= 1; months += 12; }
 
-      // para días/horas/min/seg, calculamos desde el último "mes cumplido"
       const anchor = new Date(start);
       anchor.setFullYear(start.getFullYear() + years);
       anchor.setMonth(start.getMonth() + months);
@@ -69,17 +85,17 @@ import { RELATIONSHIP_START } from '../data/relationship';
       let diffMs = now.getTime() - anchor.getTime();
       if (diffMs < 0) diffMs = 0;
 
-      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const days  = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-      const mins = Math.floor((diffMs / (1000 * 60)) % 60);
-      const secs = Math.floor((diffMs / 1000) % 60);
+      const mins  = Math.floor((diffMs / (1000 * 60)) % 60);
+      const secs  = Math.floor((diffMs / 1000) % 60);
 
-      if (yearsEl) yearsEl.textContent = String(years);
+      if (yearsEl)  yearsEl.textContent  = String(years);
       if (monthsEl) monthsEl.textContent = String(months);
-      if (daysEl) daysEl.textContent = String(days);
-      if (hoursEl) hoursEl.textContent = String(hours);
-      if (minsEl) minsEl.textContent = String(mins);
-      if (secsEl) secsEl.textContent = String(secs);
+      if (daysEl)   daysEl.textContent   = String(days);
+      if (hoursEl)  hoursEl.textContent  = String(hours);
+      if (minsEl)   minsEl.textContent   = String(mins);
+      if (secsEl)   secsEl.textContent   = String(secs);
     }
 
     update();
