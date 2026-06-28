@@ -39,7 +39,7 @@ const { nextHref } = Astro.props;
 
   .gift-title {
     font-family: 'Snell Roundhand', 'Brush Script MT', cursive;
-    font-size: clamp(2.8rem, 6vw, 4.4rem);
+    font-size: clamp(2rem, 8vw, 4.4rem);
     color: var(--gold-light);
     font-weight: 400;
     line-height: 1.02;
@@ -49,18 +49,18 @@ const { nextHref } = Astro.props;
   }
 
   .gift-sub {
-    font-size: clamp(1.05rem, 2vw, 1.28rem);
+    font-size: clamp(0.95rem, 2.5vw, 1.28rem);
     color: var(--cream);
     opacity: .96;
-    max-width: 42ch;
+    max-width: 38ch;
     line-height: 1.75;
     margin: 0 auto;
     text-shadow: 0 0 12px rgba(0, 0, 0, .08);
   }
 
   .scene-3d {
-    width: min(360px, 100%);
-    max-width: 420px;
+    /* ocupa el ancho disponible, cuadrado, max 420px */
+    width: min(85vw, 420px);
     aspect-ratio: 1 / 1;
     margin: 0 auto;
     margin-top: 10px;
@@ -68,7 +68,6 @@ const { nextHref } = Astro.props;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-inline: 10px;
   }
 
   .scene-3d::before {
@@ -93,7 +92,7 @@ const { nextHref } = Astro.props;
     color: var(--gold-light);
     opacity: .92;
     letter-spacing: .08em;
-    margin-top: 30px;
+    margin-top: 10px;
     text-transform: uppercase;
   }
 </style>
@@ -108,11 +107,15 @@ const { nextHref } = Astro.props;
     const canvas = document.getElementById('giftCanvas') as HTMLCanvasElement | null;
     if (!canvas) return;
 
-    const width = 320;
-    const height = 320;
+    // ── Leer el tamaño real del canvas en pantalla ──
+    // Usamos getBoundingClientRect para respetar el CSS responsivo
+    const rect = canvas.getBoundingClientRect();
+    const size = Math.round(Math.min(rect.width || 320, rect.height || 320));
+    const width = size;
+    const height = size;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100); // aspect 1:1 siempre
     camera.position.set(2.4, 2.0, 3.4);
     camera.lookAt(0, 0.2, 0);
 
@@ -121,10 +124,17 @@ const { nextHref } = Astro.props;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
 
+    // ── Resize handler: si la ventana cambia de tamaño, actualizar renderer ──
+    function onResize() {
+      const r = canvas!.getBoundingClientRect();
+      const s = Math.round(Math.min(r.width || 320, r.height || 320));
+      renderer.setSize(s, s);
+    }
+    window.addEventListener('resize', onResize);
+
     const giftGroup = new THREE.Group();
     scene.add(giftGroup);
 
-    // ---------- textura de papel de regalo con lunares, generada en un canvas ----------
     function createWrappingPaperTexture(baseColor: string, dotColor: string) {
       const c = document.createElement('canvas');
       c.width = 256;
@@ -149,7 +159,6 @@ const { nextHref } = Astro.props;
       return texture;
     }
 
-    // ---------- materiales ----------
     const boxMaterial = new THREE.MeshStandardMaterial({
       map: createWrappingPaperTexture('#d98a96', '#f0bcc5'),
       roughness: 0.6, metalness: 0.05,
@@ -162,7 +171,6 @@ const { nextHref } = Astro.props;
     const bowMaterial = new THREE.MeshStandardMaterial({ color: 0xffd39f, roughness: 0.22, metalness: 0.7 });
     const knotMaterial = new THREE.MeshStandardMaterial({ color: 0xffe9c4, roughness: 0.15, metalness: 0.88 });
 
-    // ---------- cuerpo (con esquinas redondeadas) ----------
     const body = new THREE.Mesh(new RoundedBoxGeometry(1.5, 1.0, 1.5, 4, 0.07), boxMaterial);
     body.castShadow = true;
     body.receiveShadow = true;
@@ -176,7 +184,6 @@ const { nextHref } = Astro.props;
     ribbonH.castShadow = true;
     giftGroup.add(ribbonH);
 
-    // ---------- tapa (grupo aparte, esto es lo que vamos a animar al abrir) ----------
     const lidGroup = new THREE.Group();
     lidGroup.position.y = 0.5 + 0.18;
     giftGroup.add(lidGroup);
@@ -196,7 +203,6 @@ const { nextHref } = Astro.props;
     lidRibbonH.castShadow = true;
     lidGroup.add(lidRibbonH);
 
-    // ---------- interior: cavidad oscura + luz cálida que se revela al abrir ----------
     const interiorMaterial = new THREE.MeshStandardMaterial({
       color: 0x2a1118, roughness: 0.9, metalness: 0,
     });
@@ -208,7 +214,6 @@ const { nextHref } = Astro.props;
     glowLight.position.y = 0.55;
     giftGroup.add(glowLight);
 
-    // ---------- lazo ----------
     const loopGeo = new THREE.TorusGeometry(0.25, 0.095, 20, 40);
 
     const loopLeft = new THREE.Mesh(loopGeo, bowMaterial);
@@ -263,28 +268,15 @@ const { nextHref } = Astro.props;
     lidGroup.add(makeTail(-0.35, -0.5));
 
     gsap.to(loopLeft.rotation, {
-      z: 0.7,
-      duration: 4.2,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
+      z: 0.7, duration: 4.2, ease: 'sine.inOut', yoyo: true, repeat: -1,
     });
     gsap.to(loopRight.rotation, {
-      z: -0.7,
-      duration: 4.2,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
+      z: -0.7, duration: 4.2, ease: 'sine.inOut', yoyo: true, repeat: -1,
     });
     gsap.to([tailLeft.rotation, tailRight.rotation], {
-      x: '+=0.08',
-      duration: 4.4,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
+      x: '+=0.08', duration: 4.4, ease: 'sine.inOut', yoyo: true, repeat: -1,
     });
 
-    // ---------- luces ----------
     const keyLight = new THREE.DirectionalLight(0xfff3e0, 2.4);
     keyLight.position.set(3, 4.5, 2.5);
     keyLight.castShadow = true;
@@ -306,7 +298,6 @@ const { nextHref } = Astro.props;
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // ---------- partículas doradas (se crean ocultas, se activan al abrir) ----------
     const sparkMaterial = new THREE.MeshBasicMaterial({ color: 0xe7cf8c, transparent: true });
     const sparkGeo = new THREE.SphereGeometry(0.045, 8, 8);
     const sparks: THREE.Mesh[] = [];
@@ -319,7 +310,6 @@ const { nextHref } = Astro.props;
       sparks.push(spark);
     }
 
-    // ---------- geometría de un corazón, hecha con curvas (igual lógica que un SVG path) ----------
     function createHeartGeometry() {
       const shape = new THREE.Shape();
       shape.moveTo(0, 0.3);
@@ -369,7 +359,6 @@ const { nextHref } = Astro.props;
       });
     }
 
-    // ---------- corazones (se crean ocultos, se activan al abrir) ----------
     const heartMaterial = new THREE.MeshStandardMaterial({
       color: 0xe8657a, roughness: 0.4, metalness: 0.1, transparent: true,
     });
@@ -419,7 +408,6 @@ const { nextHref } = Astro.props;
       });
     }
 
-    // ---------- animación idle ----------
     const idleFloat = gsap.to(giftGroup.position, {
       y: 0.18, duration: 2.1, ease: 'sine.inOut', yoyo: true, repeat: -1,
     });
@@ -427,7 +415,6 @@ const { nextHref } = Astro.props;
       y: Math.PI * 2, duration: 13, ease: 'none', repeat: -1,
     });
 
-    // ---------- apertura ----------
     let opened = false;
     function openGift() {
       if (opened) return;
@@ -469,15 +456,22 @@ const { nextHref } = Astro.props;
     }
 
     canvas.addEventListener('click', openGift);
+    canvas.addEventListener('touchend', (e) => { e.preventDefault(); openGift(); }, { passive: false });
     canvas.style.cursor = 'pointer';
 
-    // ---------- loop de render ----------
     function tick() {
       renderer.render(scene, camera);
       animationId = requestAnimationFrame(tick);
     }
     tick();
+
+    // limpieza en navegación
+    const cleanup = () => {
+      window.removeEventListener('resize', onResize);
+    };
+    document.addEventListener('astro:before-swap', cleanup, { once: true });
   }
+
   let animationId: number | null = null;
 
   document.addEventListener('astro:before-swap', () => {

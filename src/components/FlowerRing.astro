@@ -1,14 +1,11 @@
 ---
 interface Props {
   count?: number;
-  width?: number;  // ancho del corazón en píxeles
-  height?: number; // alto del corazón en píxeles
+  width?: number;
+  height?: number;
 }
 const { count = 12, width = 460, height = 460 } = Astro.props;
 
-// Curva paramétrica del corazón:
-// x(t) = 16 sin³(t)
-// y(t) = 13 cos(t) − 5 cos(2t) − 2 cos(3t) − cos(4t)
 const flowers = Array.from({ length: count }, (_, i) => {
   const t = (i / count) * Math.PI * 2;
 
@@ -19,12 +16,9 @@ const flowers = Array.from({ length: count }, (_, i) => {
     2 * Math.cos(3 * t) -
     Math.cos(4 * t);
 
-  // cada eje se escala con su propio tamaño: ya no están atados entre sí
   const offsetX = (rawX / 17) * (width / 2);
   const offsetY = -(rawY / 17) * (height / 2);
 
-  // para la rotación (que la flor "mire" tangente a la curva), también hay que
-  // compensar la deformación de escalar X e Y distinto, si no, la rotación queda mal
   const tangentX = 48 * Math.pow(Math.sin(t), 2) * Math.cos(t) * (width / 17);
   const tangentY =
     -(-13 * Math.sin(t) + 10 * Math.sin(2 * t) + 6 * Math.sin(3 * t) + 4 * Math.sin(4 * t)) *
@@ -39,7 +33,10 @@ const flowers = Array.from({ length: count }, (_, i) => {
   };
 });
 ---
-<div class="flower-ring-wrap" style={`min-height:${height}px;`}>
+<div
+  class="flower-ring-wrap"
+  style={`--ring-h:${height}px; --ring-w:${width}px;`}
+>
   <div class="flower-ring" aria-hidden="true">
     {flowers.map((f) => (
       <div
@@ -67,13 +64,18 @@ const flowers = Array.from({ length: count }, (_, i) => {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: visible;
+    /* altura base = el anillo completo */
+    min-height: var(--ring-h);
   }
+
   .flower-ring {
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 0;
   }
+
   .flower-ring-content {
     position: relative;
     z-index: 1;
@@ -88,6 +90,7 @@ const flowers = Array.from({ length: count }, (_, i) => {
     width: 26px;
     height: 26px;
   }
+
   .petal {
     position: absolute;
     width: 12px;
@@ -111,25 +114,29 @@ const flowers = Array.from({ length: count }, (_, i) => {
     background: var(--gold-light);
   }
 
-  .flower-rose .petal { background: var(--rose); opacity: .85; }
-  .flower-gold .petal { background: var(--gold); opacity: .85; }
+  .flower-rose .petal     { background: var(--rose);     opacity: .85; }
+  .flower-gold .petal     { background: var(--gold);     opacity: .85; }
   .flower-lavender .petal { background: var(--lavender); opacity: .85; }
 
-  @media (max-width: 600px) {
+  /* ── Mobile: scale the ring canvas, compensate the container height ── */
+  @media (max-width: 700px) {
     .flower-ring {
-      transform: scale(0.62);
-      transform-origin: center;
+      transform: scale(0.55);
+      transform-origin: center top;
     }
     .flower-ring-wrap {
-      min-height: 0 !important; /* dejamos que el contenido defina el alto en mobile */
+      /* altura real que ocupa el anillo escalado */
+      min-height: calc(var(--ring-h) * 0.55) !important;
     }
   }
+
+  @media (max-width: 420px) {
+    .flower-ring {
+      transform: scale(0.42);
+      transform-origin: center top;
+    }
     .flower-ring-wrap {
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: visible;
+      min-height: calc(var(--ring-h) * 0.42) !important;
+    }
   }
 </style>
